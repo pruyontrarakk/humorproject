@@ -22,10 +22,8 @@ export default function ProfileButton() {
       }
 
       const supabase = createClient();
-      const redirectTo =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/auth/callback`
-          : undefined;
+      // const redirectTo = "http://localhost:3000/auth/callback";
+      const redirectTo = process.env.NODE_ENV === "development" ? "http://localhost:3000/auth/callback" : "https://www.almostcrackd.ai/auth/callback";
 
       const timeoutMs = 8_000;
       const oauthPromise = supabase.auth.signInWithOAuth({
