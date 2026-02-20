@@ -221,37 +221,45 @@ export default async function HomePage({
               : "No images found."}
           </p>
         ) : (
-          images.map((img: ImageRow) => {
-          const imageCaptions = captionsByImageId.get(img.id) ?? [];
-          const firstCaption = imageCaptions[0] ?? null;
+          images
+            .filter((img: ImageRow) => {
+              const imageCaptions = captionsByImageId.get(img.id) ?? [];
+              const first = imageCaptions[0];
+              return imageCaptions.length > 0 && !!first?.content?.trim();
+            })
+            .map((img: ImageRow) => {
+              const imageCaptions = captionsByImageId.get(img.id) ?? [];
+              const firstCaption = imageCaptions[0] ?? null;
 
-          return (
-            <figure key={img.id} style={{ margin: 0 }}>
-              <img
-                src={img.url}
-                alt="Supabase image"
-                style={{
-                  width: "100%",
-                  height: 320,
-                  objectFit: "cover",
-                  borderRadius: 14,
-                  display: "block",
-                }}
-              />
-              <figcaption
-                style={{
-                  marginTop: 10,
-                  fontSize: 15,
-                  color: "#1a1a1a",
-                  opacity: firstCaption ? 1 : 0.6,
-                  lineHeight: 1.4,
-                }}
-              >
-                {firstCaption ? firstCaption.content : "No captions for this image."}
-              </figcaption>
-            </figure>
-          );
-        })
+              return (
+                <figure key={img.id} style={{ margin: 0 }}>
+                  <img
+                    src={img.url}
+                    alt="Supabase image"
+                    style={{
+                      width: "100%",
+                      height: 320,
+                      objectFit: "cover",
+                      borderRadius: 14,
+                      display: "block",
+                    }}
+                  />
+                  {firstCaption?.content ? (
+                    <figcaption
+                      style={{
+                        marginTop: 10,
+                        fontSize: 15,
+                        color: "#1a1a1a",
+                        opacity: 1,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {firstCaption.content}
+                    </figcaption>
+                  ) : null}
+                </figure>
+              );
+            })
         )}
       </div>
 
