@@ -44,7 +44,7 @@ export default async function VotingPage({
     const trimmed = c.content?.trim();
     if (invalidCaptionText(trimmed ?? "")) continue;
     if (!imageIdToFirstCaption.has(c.image_id)) {
-      imageIdToFirstCaption.set(c.image_id, { ...c, content: trimmed });
+      imageIdToFirstCaption.set(c.image_id, { ...c, content: trimmed ?? null });
     }
   }
   const votableImageIds = Array.from(imageIdToFirstCaption.keys());
@@ -217,7 +217,7 @@ export default async function VotingPage({
             >
               All done for now!
             </p>
-          ) : (
+          ) : firstCaption ? (
             <VotingCard
               captionId={firstCaption.id}
               userId={user?.id ?? null}
@@ -263,6 +263,17 @@ export default async function VotingPage({
                 ) : null}
               </figure>
             </VotingCard>
+          ) : (
+            <p
+              style={{
+                textAlign: "center",
+                color: "#1a1a1a",
+                opacity: 0.8,
+                marginTop: 16,
+              }}
+            >
+              All done for now!
+            </p>
           )}
         </div>
 
