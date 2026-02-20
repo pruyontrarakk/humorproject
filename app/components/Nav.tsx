@@ -55,8 +55,9 @@ export default function Nav() {
   }, []);
 
   const linkStyle = (href: string) => ({
-    padding: "10px 18px",
-    borderRadius: 8,
+    padding: "8px 14px",
+    borderRadius: 6,
+    fontSize: 14,
     fontWeight: 500,
     textDecoration: "none" as const,
     color: pathname === href ? "#1a1a1a" : "rgba(0, 0, 0, 0.7)",
@@ -69,7 +70,8 @@ export default function Nav() {
     user?.email?.split("@")[0] ||
     "Profile";
 
-  if (loading || !user) {
+  // Never show nav before sign-in: hide on landing page and when not authenticated
+  if (loading || !user || pathname === "/") {
     return null;
   }
 
@@ -80,7 +82,7 @@ export default function Nav() {
         alignItems: "center",
         justifyContent: "space-between",
         gap: 8,
-        padding: "16px 24px",
+        padding: "12px 20px",
         borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
         backgroundColor: "#ffffff",
       }}
@@ -120,10 +122,10 @@ export default function Nav() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
+                gap: 6,
                 border: "none",
-                padding: "8px 12px",
-                borderRadius: 8,
+                padding: "6px 11px",
+                borderRadius: 6,
                 fontSize: 14,
                 fontWeight: 500,
                 color: "rgba(0, 0, 0, 0.85)",
@@ -160,9 +162,9 @@ export default function Nav() {
                     top: "100%",
                     right: 0,
                     marginTop: 4,
-                    minWidth: 160,
-                    padding: "8px 0",
-                    borderRadius: 8,
+                    minWidth: 150,
+                    padding: "6px 0",
+                    borderRadius: 6,
                     backgroundColor: "#fff",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
                     border: "1px solid rgba(0,0,0,0.08)",
@@ -176,11 +178,11 @@ export default function Nav() {
                     style={{
                       display: "block",
                       width: "100%",
-                      padding: "10px 16px",
-                      textAlign: "left",
-                      border: "none",
-                      backgroundColor: "transparent",
-                      fontSize: 14,
+                    padding: "8px 14px",
+                    textAlign: "left",
+                    border: "none",
+                    backgroundColor: "transparent",
+                    fontSize: 14,
                       fontWeight: 500,
                       color: "rgba(0, 0, 0, 0.85)",
                       cursor: "pointer",
@@ -197,8 +199,8 @@ export default function Nav() {
             type="button"
             onClick={handleSignIn}
             style={{
-              padding: "8px 16px",
-              borderRadius: 8,
+              padding: "6px 14px",
+              borderRadius: 6,
               fontSize: 14,
               fontWeight: 500,
               color: "#000",

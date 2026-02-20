@@ -94,3 +94,58 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Unauthorized", details: authError?.message },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const caption_id = body?.caption_id;
+
+    if (!caption_id) {
+      return NextResponse.json(
+        { error: "Missing caption_id" },
+        { status: 400 }
+      );
+    }
+
+    const { error: deleteError } = await supabase
+      .from("caption_votes")
+      .delete()
+      .eq("profile_id", user.id)
+      .eq("caption_id", caption_id);
+
+    if (deleteError) {
+      console.error("Error deleting vote:", deleteError);
+      return NextResponse.json(
+        { error: "Failed to remove vote", details: deleteError.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

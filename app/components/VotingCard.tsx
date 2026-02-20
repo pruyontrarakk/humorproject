@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -21,6 +21,11 @@ export default function VotingCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Reset loading when we've navigated to a new image (same component instance, new captionId)
+  useEffect(() => {
+    setLoading(false);
+  }, [captionId]);
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -100,7 +105,7 @@ export default function VotingCard({
     >
       {children}
 
-      {/* Left overlay - trash */}
+      {/* Left overlay */}
       {hoverSide === "left" && (
         <div
           style={{
@@ -108,21 +113,15 @@ export default function VotingCard({
             inset: 0,
             left: 0,
             right: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             background: "rgba(239, 68, 68, 0.25)",
             borderRadius: "14px 0 0 14px",
             pointerEvents: "none",
-            fontSize: 64,
           }}
           aria-hidden
-        >
-          🗑️
-        </div>
+        />
       )}
 
-      {/* Right overlay - heart */}
+      {/* Right overlay */}
       {hoverSide === "right" && (
         <div
           style={{
@@ -130,20 +129,15 @@ export default function VotingCard({
             inset: 0,
             left: "50%",
             right: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             background: "rgba(34, 197, 94, 0.25)",
             borderRadius: "0 14px 14px 0",
             pointerEvents: "none",
-            fontSize: 64,
           }}
           aria-hidden
-        >
-          ❤️
-        </div>
+        />
       )}
 
+      {/* Loading overlay */}
       {loading && (
         <div
           style={{
@@ -152,7 +146,7 @@ export default function VotingCard({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "rgba(255,255,255,0.7)",
+            background: "rgba(255,255,255,0.9)",
             borderRadius: 14,
             fontSize: 18,
             color: "#1a1a1a",

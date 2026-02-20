@@ -56,63 +56,101 @@ export default async function HomePage({
     imageIdsForCategory = (mapping ?? []).map((row) => row.image_id);
   }
 
-  // get total count for pagination
-  let totalCount: number;
-  if (imageIdsForCategory) {
-    totalCount = imageIdsForCategory.length;
-  } else {
-    const { count } = await supabase
-      .from("images")
-      .select("*", { count: "exact", head: true });
-    totalCount = count ?? 0;
-  }
+  // Only include images that have at least one non-empty caption (and valid image)
+  const { data: captionsWithContent } = await supabase
+    .from("captions")
+    .select("id, image_id, content")
+    .not("content", "is", null);
 
-  const totalPages = totalCount ? Math.ceil(totalCount / itemsPerPage) : 1;
+  const imageIdsWithCaption = new Set<string>();
+  (captionsWithContent ?? []).forEach((c) => {
+    const t = c.content?.trim();
+    if (t && t.toLowerCase() !== "next") imageIdsWithCaption.add(c.image_id);
+  });
 
-  // get images from supabase with pagination (filtered by category when selected)
-  let images: ImageRow[] = [];
-  if (imageIdsForCategory && imageIdsForCategory.length === 0) {
-    // category has no images — skip query
-  } else {
-    let imagesQuery = supabase
-      .from("images")
-      .select("id, url, created_datetime_utc")
-      .order("created_datetime_utc", { ascending: false });
-
-    if (imageIdsForCategory && imageIdsForCategory.length > 0) {
-      imagesQuery = imagesQuery.in("id", imageIdsForCategory);
-    }
-
-    const { data: imagesData, error: imagesError } = await imagesQuery.range(
-      offset,
-      offset + itemsPerPage - 1
+  if (imageIdsWithCaption.size === 0) {
+    const totalPages = 1;
+    const paginationBase =
+      selectedCategoryId === ALL_CATEGORIES_ID
+        ? "/home?"
+        : `/home?category=${encodeURIComponent(selectedCategoryId)}&`;
+    return (
+      <main style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}>
+        <div
+          style={{
+            borderTopLeftRadius: 40,
+            borderTopRightRadius: 40,
+            backgroundColor: "#f8f9fa",
+            padding: "40px 88px 72px 88px",
+            minHeight: "calc(100vh - 0px)",
+            boxShadow: "0 -4px 24px rgba(0, 0, 0, 0.06)",
+          }}
+        >
+          <h1 style={{ textAlign: "center", fontSize: "2rem", fontWeight: "bold", marginBottom: "24px", color: "#1a1a1a" }}>
+            The Humor Project
+          </h1>
+          <p style={{ gridColumn: "1 / -1", textAlign: "center", color: "#1a1a1a", opacity: 0.7, marginTop: 24 }}>
+            No images with captions found.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "32px", alignItems: "center" }}>
+            <span style={{ color: "#1a1a1a" }}>Page 1 of 1</span>
+          </div>
+        </div>
+      </main>
     );
-
-    if (imagesError) {
-      return <pre>Error loading images: {imagesError.message}</pre>;
-    }
-    images = imagesData ?? [];
   }
 
-  // get captions for those images (only when we have images)
+  let imagesQuery = supabase
+    .from("images")
+    .select("id, url, created_datetime_utc")
+    .in("id", Array.from(imageIdsWithCaption))
+    .order("created_datetime_utc", { ascending: false });
+
+  const { data: allDisplayableImages, error: imagesError } = await imagesQuery;
+
+  if (imagesError) {
+    return <pre>Error loading images: {imagesError.message}</pre>;
+  }
+
+  let displayableOrdered: ImageRow[] = (allDisplayableImages ?? []).filter(
+    (img) => img?.url
+  );
+
+  if (imageIdsForCategory && imageIdsForCategory.length > 0) {
+    const categorySet = new Set(imageIdsForCategory);
+    displayableOrdered = displayableOrdered.filter((img) =>
+      categorySet.has(img.id)
+    );
+  } else if (imageIdsForCategory && imageIdsForCategory.length === 0) {
+    displayableOrdered = [];
+  }
+
+  const totalCount = displayableOrdered.length;
+  const totalPages = totalCount ? Math.ceil(totalCount / itemsPerPage) : 1;
+  const pageImages = displayableOrdered.slice(offset, offset + itemsPerPage);
+
   const captionsByImageId = new Map<string, CaptionRow[]>();
-  if (images.length > 0) {
-    const imageIds = images.map((img) => img.id);
+  if (pageImages.length > 0) {
     const { data: captions, error: captionsError } = await supabase
       .from("captions")
       .select("id, image_id, content")
-      .in("image_id", imageIds);
+      .in("image_id", pageImages.map((img) => img.id))
+      .not("content", "is", null);
 
     if (captionsError) {
       return <pre>Error loading captions: {captionsError.message}</pre>;
     }
 
     (captions ?? []).forEach((caption) => {
+      const t = caption.content?.trim();
+      if (!t || t.toLowerCase() === "next") return;
       const arr = captionsByImageId.get(caption.image_id) ?? [];
       arr.push(caption);
       captionsByImageId.set(caption.image_id, arr);
     });
   }
+
+  const images = pageImages;
 
   const paginationBase =
     selectedCategoryId === ALL_CATEGORIES_ID
@@ -224,12 +262,13 @@ export default async function HomePage({
           images
             .filter((img: ImageRow) => {
               const imageCaptions = captionsByImageId.get(img.id) ?? [];
-              const first = imageCaptions[0];
-              return imageCaptions.length > 0 && !!first?.content?.trim();
+              const withContent = imageCaptions.find((c) => c.content?.trim());
+              return !!img?.url && !!withContent;
             })
             .map((img: ImageRow) => {
               const imageCaptions = captionsByImageId.get(img.id) ?? [];
-              const firstCaption = imageCaptions[0] ?? null;
+              const firstCaption =
+                imageCaptions.find((c) => c.content?.trim()) ?? imageCaptions[0] ?? null;
 
               return (
                 <figure key={img.id} style={{ margin: 0 }}>
@@ -244,7 +283,7 @@ export default async function HomePage({
                       display: "block",
                     }}
                   />
-                  {firstCaption?.content ? (
+                  {firstCaption?.content && firstCaption.content.trim().toLowerCase() !== "next" ? (
                     <figcaption
                       style={{
                         marginTop: 10,
