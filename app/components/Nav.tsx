@@ -94,6 +94,9 @@ export default function Nav() {
         <Link href="/voting" style={linkStyle("/voting")}>
           Voting
         </Link>
+        <Link href="/upload" style={linkStyle("/upload")}>
+          Upload
+        </Link>
       </div>
 
       <div
