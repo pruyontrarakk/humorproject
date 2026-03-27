@@ -66,15 +66,7 @@ export default function ProfileButton() {
         aria-label="Sign in with Google"
         onClick={handleClick}
         disabled={loading}
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          fontSize: 16,
-          fontWeight: 500,
-          color: "#000000",
-          cursor: loading ? "not-allowed" : "pointer",
-        }}
+        className="btn-primary text-base disabled:cursor-not-allowed"
       >
         Sign in
       </button>

@@ -56,12 +56,13 @@ export default function Nav() {
 
   const linkStyle = (href: string) => ({
     padding: "8px 14px",
-    borderRadius: 6,
+    borderRadius: 12,
     fontSize: 14,
     fontWeight: 500,
     textDecoration: "none" as const,
-    color: pathname === href ? "#1a1a1a" : "rgba(0, 0, 0, 0.7)",
-    backgroundColor: pathname === href ? "rgba(0, 0, 0, 0.08)" : "transparent",
+    color: pathname === href ? "#5d3017" : "#475569",
+    backgroundColor:
+      pathname === href ? "rgba(151, 77, 30, 0.12)" : "transparent",
   });
 
   const displayName =
@@ -70,24 +71,14 @@ export default function Nav() {
     user?.email?.split("@")[0] ||
     "Profile";
 
-  // Never show nav before sign-in: hide on landing page and when not authenticated
-  if (loading || !user || pathname === "/") {
+  // Hide on marketing / auth pages and when not authenticated
+  if (loading || !user || pathname === "/" || pathname === "/login") {
     return null;
   }
 
   return (
-    <nav
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        padding: "12px 20px",
-        borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
-        backgroundColor: "#ffffff",
-      }}
-    >
-      <div style={{ display: "flex", gap: 8 }}>
+    <nav className="flex items-center justify-between gap-2 border-b border-slate-200 bg-white px-5 py-3">
+      <div className="flex gap-1">
         <Link href="/home" style={linkStyle("/home")}>
           Home
         </Link>
@@ -122,19 +113,19 @@ export default function Nav() {
               onClick={() => setMenuOpen((o) => !o)}
               aria-expanded={menuOpen}
               aria-haspopup="true"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                border: "none",
-                padding: "6px 11px",
-                borderRadius: 6,
-                fontSize: 14,
-                fontWeight: 500,
-                color: "rgba(0, 0, 0, 0.85)",
-                cursor: "pointer",
-                backgroundColor: menuOpen ? "rgba(0, 0, 0, 0.06)" : "transparent",
-              }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              border: "none",
+              padding: "6px 11px",
+              borderRadius: 12,
+              fontSize: 14,
+              fontWeight: 500,
+              color: "#334155",
+              cursor: "pointer",
+              backgroundColor: menuOpen ? "rgba(151, 77, 30, 0.1)" : "transparent",
+            }}
             >
               <span>{displayName}</span>
               <span
@@ -167,10 +158,10 @@ export default function Nav() {
                     marginTop: 4,
                     minWidth: 150,
                     padding: "6px 0",
-                    borderRadius: 6,
+                    borderRadius: 12,
                     backgroundColor: "#fff",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-                    border: "1px solid rgba(0,0,0,0.08)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    border: "1px solid #e2e8f0",
                     zIndex: 20,
                   }}
                 >
@@ -201,16 +192,7 @@ export default function Nav() {
           <button
             type="button"
             onClick={handleSignIn}
-            style={{
-              padding: "6px 14px",
-              borderRadius: 6,
-              fontSize: 14,
-              fontWeight: 500,
-              color: "#000",
-              backgroundColor: "rgba(0, 0, 0, 0.06)",
-              border: "none",
-              cursor: "pointer",
-            }}
+            className="btn-primary rounded-xl px-3.5 py-1.5 text-sm"
           >
             Sign in
           </button>

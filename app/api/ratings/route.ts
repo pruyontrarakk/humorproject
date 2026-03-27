@@ -39,16 +39,30 @@ export async function POST(request: Request) {
       );
     }
 
-    const now = new Date().toISOString();
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile?.id) {
+      return NextResponse.json(
+        { error: "Profile not found", details: profileError?.message },
+        { status: 403 }
+      );
+    }
+
+    const profileId = profile.id;
+
     const row = {
-      profile_id: user.id,
+      profile_id: profileId,
       caption_id,
       vote_value: rating,
-      created_datetime_utc: now,
-      modified_datetime_utc: now,
+      created_by_user_id: profileId,
+      modified_by_user_id: profileId,
     };
 
-    // Insert new vote (created_datetime_utc required by DB). If row exists, update instead.
+    // Insert new vote. Timestamps are set by the database. If row exists, update instead.
     const { data: insertData, error: insertError } = await supabase
       .from("caption_votes")
       .insert(row)
@@ -57,14 +71,14 @@ export async function POST(request: Request) {
 
     if (insertError) {
       if (insertError.code === "23505") {
-        // Unique violation: row exists, update it (do not overwrite created_datetime_utc)
+        // Unique violation: row exists, update it (preserve created_* columns)
         const { data: updateData, error: updateError } = await supabase
           .from("caption_votes")
           .update({
             vote_value: rating,
-            modified_datetime_utc: now,
+            modified_by_user_id: profileId,
           })
-          .eq("profile_id", user.id)
+          .eq("profile_id", profileId)
           .eq("caption_id", caption_id)
           .select()
           .single();
