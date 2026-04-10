@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { votingTheme as vt } from "@/lib/votingTheme";
 
 type VotingUndoBarProps = {
   previousCaptionId: string;
@@ -52,28 +53,20 @@ export default function VotingUndoBar({
   };
 
   return (
-    <div
-      style={{
-        position: "sticky",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        marginTop: 24,
-        paddingBottom: 24,
-        paddingTop: 16,
-        textAlign: "center",
-        background: "#f8f9fa",
-      }}
-    >
+    <div style={{ flexShrink: 0 }}>
       <button
         type="button"
         onClick={handleUndo}
         disabled={loading}
         aria-label="Undo last vote"
         style={{
-          padding: 8,
-          border: "none",
-          background: "none",
+          width: 40,
+          height: 40,
+          padding: 0,
+          border: `1px solid ${vt.borderBrown}`,
+          borderRadius: "50%",
+          background: vt.cardWhite,
+          boxShadow: `${vt.cardShadow}, 0 0 0 1px ${vt.purpleBorder}`,
           cursor: loading ? "not-allowed" : "pointer",
           opacity: loading ? 0.7 : 1,
           display: "inline-flex",
@@ -100,7 +93,7 @@ export default function VotingUndoBar({
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ color: "#1a1a1a", flexShrink: 0 }}
+          style={{ color: vt.brown800, flexShrink: 0 }}
           aria-hidden
         >
           <path d="M3 10h10a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5H7" />

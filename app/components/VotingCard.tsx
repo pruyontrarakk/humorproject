@@ -3,11 +3,17 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { votingTheme as vt } from "@/lib/votingTheme";
 
 type VotingCardProps = {
   captionId: string;
   userId: string | null;
   nextPageUrl: string | null;
+  /** When set, successful vote calls this instead of navigating (parent runs transition + navigation). */
+  onVoteRecorded?: (info: {
+    nextPageUrl: string | null;
+    side: "left" | "right";
+  }) => void;
   children: React.ReactNode;
 };
 
@@ -15,6 +21,7 @@ export default function VotingCard({
   captionId,
   userId,
   nextPageUrl,
+  onVoteRecorded,
   children,
 }: VotingCardProps) {
   const router = useRouter();
@@ -74,13 +81,17 @@ export default function VotingCard({
           const msg = data.details ?? data.error ?? "Failed to save vote";
           throw new Error(msg);
         }
-        router.push(nextPageUrl ?? "/voting");
+        if (onVoteRecorded) {
+          onVoteRecorded({ nextPageUrl, side: hoverSide });
+        } else {
+          router.push(nextPageUrl ?? "/voting");
+        }
       } catch (err) {
         console.error("Error voting:", err);
         setLoading(false);
       }
     },
-    [userId, hoverSide, loading, captionId, nextPageUrl, router]
+    [userId, hoverSide, loading, captionId, nextPageUrl, router, onVoteRecorded]
   );
 
   if (!userId) {
@@ -92,6 +103,7 @@ export default function VotingCard({
   return (
     <div
       ref={cardRef}
+      aria-busy={loading}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
@@ -113,7 +125,7 @@ export default function VotingCard({
             inset: 0,
             left: 0,
             right: "50%",
-            background: "rgba(239, 68, 68, 0.25)",
+            background: vt.overlayNotFunny,
             borderRadius: "14px 0 0 14px",
             pointerEvents: "none",
           }}
@@ -129,31 +141,12 @@ export default function VotingCard({
             inset: 0,
             left: "50%",
             right: 0,
-            background: "rgba(34, 197, 94, 0.25)",
+            background: vt.overlayFunny,
             borderRadius: "0 14px 14px 0",
             pointerEvents: "none",
           }}
           aria-hidden
         />
-      )}
-
-      {/* Loading overlay */}
-      {loading && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(255,255,255,0.9)",
-            borderRadius: 14,
-            fontSize: 18,
-            color: "#1a1a1a",
-          }}
-        >
-          Saving…
-        </div>
       )}
     </div>
   );

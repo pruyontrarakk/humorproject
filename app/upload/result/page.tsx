@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { votingTheme as vt } from "@/lib/votingTheme";
 
 const UPLOAD_RESULT_KEY = "upload-result";
 
@@ -34,13 +35,13 @@ export default function UploadResultPage() {
       <main
         style={{
           minHeight: "100vh",
-          backgroundColor: "#ffffff",
+          backgroundColor: vt.mainBg,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <p style={{ color: "#1a1a1a", opacity: 0.7 }}>Loading…</p>
+        <p style={{ color: vt.textMuted }}>Loading…</p>
       </main>
     );
   }
@@ -50,7 +51,7 @@ export default function UploadResultPage() {
       <main
         style={{
           minHeight: "100vh",
-          backgroundColor: "#ffffff",
+          backgroundColor: vt.mainBg,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -58,15 +59,15 @@ export default function UploadResultPage() {
           gap: 16,
         }}
       >
-        <p style={{ color: "#1a1a1a", opacity: 0.7 }}>
+        <p style={{ color: vt.textMuted }}>
           No result found. Upload an image first.
         </p>
         <Link
           href="/upload"
           style={{
             padding: "10px 20px",
-            backgroundColor: "#1a1a1a",
-            color: "#ffffff",
+            backgroundColor: vt.ctaBg,
+            color: vt.ctaFg,
             borderRadius: 8,
             textDecoration: "none",
             fontSize: 14,
@@ -85,35 +86,39 @@ export default function UploadResultPage() {
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#ffffff",
+        backgroundColor: vt.mainBg,
       }}
     >
       <div
         style={{
           borderTopLeftRadius: 40,
           borderTopRightRadius: 40,
-          backgroundColor: "#f8f9fa",
-          padding: "40px 88px 72px 88px",
+          background: vt.panelBgGradient,
+          padding: "40px clamp(16px, 5vw, 88px) 72px",
           minHeight: "calc(100vh - 0px)",
-          boxShadow: "0 -4px 24px rgba(0, 0, 0, 0.06)",
+          boxShadow: vt.panelShadow,
+          borderTop: `1px solid ${vt.borderBrownLight}`,
         }}
       >
-        <h1
-          style={{
-            textAlign: "center",
-            fontSize: "2rem",
-            fontWeight: "bold",
-            marginBottom: "8px",
-            color: "#1a1a1a",
-          }}
-        >
-          Generated Captions
-        </h1>
+        <div style={{ textAlign: "center", marginBottom: 8 }}>
+          <h1
+            style={{
+              display: "inline-block",
+              fontSize: "2rem",
+              fontWeight: "bold",
+              margin: 0,
+              color: vt.brown800,
+              borderBottom: `3px solid ${vt.purple}`,
+              paddingBottom: 6,
+            }}
+          >
+            Generated Captions
+          </h1>
+        </div>
         <p
           style={{
             textAlign: "center",
-            color: "#1a1a1a",
-            opacity: 0.7,
+            color: vt.textMuted,
             marginBottom: 32,
             fontSize: 15,
           }}
@@ -160,10 +165,11 @@ export default function UploadResultPage() {
                   padding: 24,
                   backgroundColor: "#ffffff",
                   borderRadius: 12,
-                  border: "1px solid rgba(0, 0, 0, 0.08)",
+                  border: `1px solid ${vt.borderBrown}`,
+                  boxShadow: vt.cardShadow,
                 }}
               >
-                <p style={{ margin: 0, color: "#1a1a1a", opacity: 0.7 }}>
+                <p style={{ margin: 0, color: vt.textMuted }}>
                   No captions were generated.
                 </p>
               </div>
@@ -175,10 +181,11 @@ export default function UploadResultPage() {
                     padding: 24,
                     backgroundColor: "#ffffff",
                     borderRadius: 12,
-                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    border: `1px solid ${vt.borderBrown}`,
                     fontSize: 16,
-                    color: "#1a1a1a",
+                    color: vt.brown800,
                     lineHeight: 1.5,
+                    boxShadow: vt.cardShadow,
                   }}
                 >
                   {caption.content}
@@ -199,8 +206,8 @@ export default function UploadResultPage() {
               href="/upload"
               style={{
                 padding: "12px 24px",
-                backgroundColor: "#1a1a1a",
-                color: "#ffffff",
+                backgroundColor: vt.ctaBg,
+                color: vt.ctaFg,
                 borderRadius: 12,
                 textDecoration: "none",
                 fontSize: 16,

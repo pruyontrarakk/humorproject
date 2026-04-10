@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createSupabaseWithAccessToken } from "@/lib/supabaseAccessToken";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -9,11 +10,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase = await createClient();
+    const cookieClient = await createClient();
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser(token);
+    } = await cookieClient.auth.getUser(token);
 
     if (authError || !user) {
       return NextResponse.json(
@@ -21,6 +22,9 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
+
+    // Same JWT as the browser: RLS and inserts must not use a different (cookie-only) session.
+    const supabase = createSupabaseWithAccessToken(token);
 
     const body = await request.json();
     const { caption_id, rating } = body;
@@ -117,11 +121,11 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase = await createClient();
+    const cookieClient = await createClient();
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser(token);
+    } = await cookieClient.auth.getUser(token);
 
     if (authError || !user) {
       return NextResponse.json(
@@ -129,6 +133,8 @@ export async function DELETE(request: Request) {
         { status: 401 }
       );
     }
+
+    const supabase = createSupabaseWithAccessToken(token);
 
     const body = await request.json().catch(() => ({}));
     const caption_id = body?.caption_id;

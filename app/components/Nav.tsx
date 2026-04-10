@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { votingTheme as vt } from "@/lib/votingTheme";
 import type { User } from "@supabase/supabase-js";
 
 export default function Nav() {
@@ -60,9 +61,8 @@ export default function Nav() {
     fontSize: 14,
     fontWeight: 500,
     textDecoration: "none" as const,
-    color: pathname === href ? "#5d3017" : "#475569",
-    backgroundColor:
-      pathname === href ? "rgba(151, 77, 30, 0.12)" : "transparent",
+    color: pathname === href ? vt.navActiveFg : vt.navInactiveFg,
+    backgroundColor: pathname === href ? vt.navActiveBg : "transparent",
   });
 
   const displayName =
@@ -77,7 +77,23 @@ export default function Nav() {
   }
 
   return (
-    <nav className="flex items-center justify-between gap-2 border-b border-slate-200 bg-white px-5 py-3">
+    <nav
+      className="flex items-center justify-between gap-2 bg-white px-5 py-3"
+      style={{
+        borderBottom:
+          pathname === "/home" ||
+          pathname === "/voting" ||
+          pathname.startsWith("/upload")
+            ? `2px solid ${vt.purple}`
+            : `1px solid ${vt.borderBrownLight}`,
+        boxShadow:
+          pathname === "/home" ||
+          pathname === "/voting" ||
+          pathname.startsWith("/upload")
+            ? `0 3px 12px ${vt.purpleMuted}`
+            : undefined,
+      }}
+    >
       <div className="flex gap-1">
         <Link href="/home" style={linkStyle("/home")}>
           Home
@@ -122,9 +138,9 @@ export default function Nav() {
               borderRadius: 12,
               fontSize: 14,
               fontWeight: 500,
-              color: "#334155",
+              color: vt.brown700,
               cursor: "pointer",
-              backgroundColor: menuOpen ? "rgba(151, 77, 30, 0.1)" : "transparent",
+              backgroundColor: menuOpen ? vt.navActiveBg : "transparent",
             }}
             >
               <span>{displayName}</span>
@@ -159,9 +175,9 @@ export default function Nav() {
                     minWidth: 150,
                     padding: "6px 0",
                     borderRadius: 12,
-                    backgroundColor: "#fff",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    border: "1px solid #e2e8f0",
+                    backgroundColor: vt.cardWhite,
+                    boxShadow: vt.cardShadow,
+                    border: `1px solid ${vt.borderBrown}`,
                     zIndex: 20,
                   }}
                 >
@@ -178,7 +194,7 @@ export default function Nav() {
                     backgroundColor: "transparent",
                     fontSize: 14,
                       fontWeight: 500,
-                      color: "rgba(0, 0, 0, 0.85)",
+                      color: vt.brown800,
                       cursor: "pointer",
                     }}
                   >

@@ -1,8 +1,12 @@
 import { getSupabase } from "@/lib/supabaseClient";
 import { createClient } from "@/lib/supabase/server";
-import VotingCard from "@/app/components/VotingCard";
+import VotingDeck from "@/app/components/VotingDeck";
+import VotingLeaderboard from "@/app/components/VotingLeaderboard";
 import VotingUndoBar from "@/app/components/VotingUndoBar";
 import VotingPageResume from "@/app/components/VotingPageResume";
+import { safeSupabaseErrorMessage } from "@/lib/safeSupabaseError";
+import { loadVotingLeaderboard } from "@/lib/votingLeaderboard";
+import { votingTheme as vt } from "@/lib/votingTheme";
 
 type ImageRow = {
   id: string;
@@ -34,7 +38,12 @@ export default async function VotingPage({
     .not("content", "is", null);
 
   if (captionsError) {
-    return <pre style={{ padding: 24 }}>Error loading captions: {captionsError.message}</pre>;
+    return (
+      <pre style={{ padding: 24, background: vt.mainBg, color: vt.brown800 }}>
+        Error loading captions:{" "}
+        {safeSupabaseErrorMessage(captionsError.message)}
+      </pre>
+    );
   }
 
   const captions: CaptionRow[] = captionsData ?? [];
@@ -52,27 +61,61 @@ export default async function VotingPage({
   if (votableImageIds.length === 0) {
     const serverSupabase = await createClient();
     const { data: { user } } = await serverSupabase.auth.getUser();
+    const leaderboard = await loadVotingLeaderboard(serverSupabase, user?.id ?? null);
     return (
-      <main style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}>
+      <main style={{ minHeight: "100vh", backgroundColor: vt.mainBg }}>
         <div
           style={{
             borderTopLeftRadius: 40,
             borderTopRightRadius: 40,
-            backgroundColor: "#f8f9fa",
-            padding: "40px 88px 72px 88px",
+            background: vt.panelBgGradient,
+            padding: "40px clamp(16px, 5vw, 32px) 72px",
             minHeight: "calc(100vh - 0px)",
-            boxShadow: "0 -4px 24px rgba(0, 0, 0, 0.06)",
+            boxShadow: vt.panelShadow,
+            position: "relative",
+            borderTop: `1px solid ${vt.borderBrownLight}`,
           }}
         >
-          <h1 style={{ textAlign: "center", fontSize: "2rem", fontWeight: "bold", marginBottom: "24px", color: "#1a1a1a" }}>
-            Vote on captions
-          </h1>
+          <div style={{ position: "absolute", top: 40, right: "clamp(16px, 5vw, 32px)", zIndex: 2 }}>
+            <VotingLeaderboard
+              topFive={leaderboard.topFive}
+              viewerUserId={user?.id ?? null}
+              viewerRank={leaderboard.viewerRank}
+              viewerVoteCount={leaderboard.viewerVoteCount}
+              loadError={leaderboard.error}
+            />
+          </div>
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <h1
+              style={{
+                display: "inline-block",
+                fontSize: "2rem",
+                fontWeight: "bold",
+                margin: 0,
+                color: vt.brown800,
+                borderBottom: `3px solid ${vt.purple}`,
+                paddingBottom: 6,
+              }}
+            >
+              Voting
+            </h1>
+          </div>
+          <p
+            style={{
+              textAlign: "center",
+              color: vt.textMuted,
+              margin: "0 auto 24px",
+              maxWidth: 720,
+              lineHeight: 1.55,
+              fontSize: 15,
+            }}
+          >
+            We want to understand how funny the image and caption are together—like getting the meme as a whole, with both in mind.
+          </p>
           {!user ? (
-            <p style={{ textAlign: "center", color: "#1a1a1a", opacity: 0.9, marginBottom: 24 }}>
-              Sign in with Google to vote.
-            </p>
+            <p style={{ textAlign: "center", color: vt.brown700, marginBottom: 24 }}>Sign in with Google to vote.</p>
           ) : null}
-          <p style={{ textAlign: "center", color: "#1a1a1a", opacity: 0.8, marginTop: 24 }}>
+          <p style={{ textAlign: "center", color: vt.textMuted, marginTop: 24 }}>
             No images with captions to vote on.
           </p>
         </div>
@@ -87,7 +130,12 @@ export default async function VotingPage({
     .order("created_datetime_utc", { ascending: false });
 
   if (imagesError) {
-    return <pre style={{ padding: 24 }}>Error loading images: {imagesError.message}</pre>;
+    return (
+      <pre style={{ padding: 24, background: vt.mainBg, color: vt.brown800 }}>
+        Error loading images:{" "}
+        {safeSupabaseErrorMessage(imagesError.message)}
+      </pre>
+    );
   }
 
   const orderedImages: ImageRow[] = imagesData ?? [];
@@ -95,6 +143,8 @@ export default async function VotingPage({
   const {
     data: { user },
   } = await serverSupabase.auth.getUser();
+
+  const leaderboard = await loadVotingLeaderboard(serverSupabase, user?.id ?? null);
 
   const votedCaptionIds = new Set<string>();
   if (user) {
@@ -116,8 +166,6 @@ export default async function VotingPage({
   const firstCaption = img ? imageIdToFirstCaption.get(img.id) ?? null : null;
   const hasCaption = Boolean(firstCaption?.content?.trim());
 
-  const nextPageUrl =
-    currentPage < totalPages ? `/voting?page=${currentPage + 1}` : null;
   const previousPageUrl =
     currentPage > 1 ? `/voting?page=${currentPage - 1}` : null;
   const previousImage =
@@ -131,11 +179,20 @@ export default async function VotingPage({
     previousCaption != null &&
     previousPageUrl != null;
 
+  const voteQueue = unvotedImages.map((image) => {
+    const cap = imageIdToFirstCaption.get(image.id)!;
+    return {
+      captionId: cap.id,
+      imageUrl: image.url,
+      captionText: cap.content?.trim() ?? "",
+    };
+  });
+
   return (
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#ffffff",
+        backgroundColor: vt.mainBg,
       }}
     >
       {user && totalPages >= 1 ? (
@@ -145,30 +202,65 @@ export default async function VotingPage({
         style={{
           borderTopLeftRadius: 40,
           borderTopRightRadius: 40,
-          backgroundColor: "#f8f9fa",
-          padding: "20px 32px 40px 32px",
+          background: vt.panelBgGradient,
+          padding: "20px clamp(12px, 4vw, 20px) 40px",
           minHeight: "calc(100vh - 0px)",
-          boxShadow: "0 -4px 24px rgba(0, 0, 0, 0.06)",
+          boxShadow: vt.panelShadow,
+          position: "relative",
+          borderTop: `1px solid ${vt.borderBrownLight}`,
         }}
       >
-        <h1
+        <div
           style={{
-            textAlign: "center",
-            fontSize: "2rem",
-            fontWeight: "bold",
-            marginBottom: "24px",
-            color: "#1a1a1a",
+            position: "absolute",
+            top: 20,
+            right: "clamp(12px, 4vw, 20px)",
+            zIndex: 2,
           }}
         >
-          Vote on captions
-        </h1>
+          <VotingLeaderboard
+            topFive={leaderboard.topFive}
+            viewerUserId={user?.id ?? null}
+            viewerRank={leaderboard.viewerRank}
+            viewerVoteCount={leaderboard.viewerVoteCount}
+            loadError={leaderboard.error}
+          />
+        </div>
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
+          <h1
+            style={{
+              display: "inline-block",
+              fontSize: "2rem",
+              fontWeight: "bold",
+              margin: 0,
+              color: vt.brown800,
+              borderBottom: `3px solid ${vt.purple}`,
+              paddingBottom: 6,
+            }}
+          >
+            Voting
+          </h1>
+        </div>
+        <p
+          style={{
+            textAlign: "center",
+            color: vt.textMuted,
+            margin: "0 auto 24px",
+            maxWidth: 720,
+            lineHeight: 1.55,
+            fontSize: 15,
+          }}
+        >
+          We want to understand how funny the image and caption are together—like getting the meme as a whole, with both in mind.
+        </p>
 
         {user && img && hasCaption ? (
           <p
             style={{
               textAlign: "center",
               fontSize: 14,
-              color: "rgba(0,0,0,0.6)",
+              color: vt.purple,
+              fontWeight: 600,
               marginBottom: 6,
             }}
           >
@@ -180,8 +272,7 @@ export default async function VotingPage({
           <p
             style={{
               textAlign: "center",
-              color: "#1a1a1a",
-              opacity: 0.9,
+              color: vt.brown700,
               marginBottom: 16,
             }}
           >
@@ -191,98 +282,75 @@ export default async function VotingPage({
 
         <div
           style={{
-            maxWidth: 480,
-            margin: "12px auto 0",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            gap: 12,
+            margin: "12px 0 0",
+            width: "100%",
+            flexWrap: "wrap",
           }}
         >
-          {!img ? (
-            <p
-              style={{
-                textAlign: "center",
-                color: "#1a1a1a",
-                opacity: 0.8,
-                marginTop: 16,
-              }}
-            >
-              All done for now!
-            </p>
-          ) : !hasCaption ? (
-            <p
-              style={{
-                textAlign: "center",
-                color: "#1a1a1a",
-                opacity: 0.8,
-                marginTop: 16,
-              }}
-            >
-              All done for now!
-            </p>
-          ) : firstCaption ? (
-            <VotingCard
-              captionId={firstCaption.id}
-              userId={user?.id ?? null}
-              nextPageUrl={nextPageUrl}
-            >
-              <figure
+          <div
+            style={{
+              flex: "0 1 480px",
+              maxWidth: 480,
+              width: "100%",
+            }}
+          >
+            {!img ? (
+              <p
                 style={{
-                  margin: 0,
-                  width: "100%",
-                  display: "block",
-                  overflow: "hidden",
-                  borderRadius: firstCaption.content ? "14px 14px 0 0" : 14,
+                  textAlign: "center",
+                  color: vt.textMuted,
+                  marginTop: 16,
                 }}
               >
-                <img
-                  src={img.url}
-                  alt=""
-                  style={{
-                    width: "100%",
-                    height: "52vh",
-                    display: "block",
-                    objectFit: "cover",
-                    borderRadius: firstCaption.content ? "14px 14px 0 0" : 14,
-                  }}
-                />
-                {firstCaption.content && firstCaption.content.trim().toLowerCase() !== "next" ? (
-                  <figcaption
-                    style={{
-                      width: "100%",
-                      boxSizing: "border-box",
-                      margin: 0,
-                      marginTop: -1,
-                      padding: "12px 16px",
-                      background: "rgba(0,0,0,0.04)",
-                      borderRadius: "0 0 14px 14px",
-                      fontSize: 18,
-                      color: "#1a1a1a",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {firstCaption.content}
-                  </figcaption>
-                ) : null}
-              </figure>
-            </VotingCard>
-          ) : (
-            <p
-              style={{
-                textAlign: "center",
-                color: "#1a1a1a",
-                opacity: 0.8,
-                marginTop: 16,
-              }}
-            >
-              All done for now!
-            </p>
-          )}
+                All done for now!
+              </p>
+            ) : !hasCaption ? (
+              <p
+                style={{
+                  textAlign: "center",
+                  color: vt.textMuted,
+                  marginTop: 16,
+                }}
+              >
+                All done for now!
+              </p>
+            ) : firstCaption ? (
+              <VotingDeck
+                queue={voteQueue}
+                page={currentPage}
+                userId={user?.id ?? null}
+              />
+            ) : (
+              <p
+                style={{
+                  textAlign: "center",
+                  color: vt.textMuted,
+                  marginTop: 16,
+                }}
+              >
+                All done for now!
+              </p>
+            )}
+          </div>
+          {showUndo &&
+          previousCaption &&
+          previousPageUrl &&
+          img &&
+          hasCaption &&
+          firstCaption ? (
+            <div style={{ flexShrink: 0, paddingTop: 10 }}>
+              <VotingUndoBar
+                previousCaptionId={previousCaption.id}
+                previousPageUrl={previousPageUrl}
+              />
+            </div>
+          ) : null}
         </div>
-
-        {showUndo && previousCaption && previousPageUrl ? (
-          <VotingUndoBar
-            previousCaptionId={previousCaption.id}
-            previousPageUrl={previousPageUrl}
-          />
-        ) : null}
       </div>
     </main>
   );

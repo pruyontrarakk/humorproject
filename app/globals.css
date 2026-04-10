@@ -43,3 +43,73 @@ body {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-brand-600/30 transition hover:-translate-y-px hover:bg-brand-500 hover:shadow-brand-500/40 disabled:cursor-not-allowed disabled:opacity-60;
   }
 }
+
+/* Voting deck: 2D slide + tilt toward the click side (avoids 3D overlap / stuck compositing) */
+@keyframes voting-flip-out-right {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(42%, 0, 0) rotate(10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes voting-flip-in-right {
+  from {
+    transform: translate3d(-38%, 0, 0) rotate(-10deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes voting-flip-out-left {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(-42%, 0, 0) rotate(-10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes voting-flip-in-left {
+  from {
+    transform: translate3d(38%, 0, 0) rotate(10deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.voting-deck-stage {
+  isolation: isolate;
+}
+
+.voting-flip-layer {
+  will-change: transform, opacity;
+}
+
+.voting-flip-out-right {
+  animation: voting-flip-out-right 0.58s cubic-bezier(0.45, 0.02, 0.2, 1) forwards;
+}
+
+.voting-flip-in-right {
+  animation: voting-flip-in-right 0.58s cubic-bezier(0.45, 0.02, 0.2, 1) forwards;
+}
+
+.voting-flip-out-left {
+  animation: voting-flip-out-left 0.58s cubic-bezier(0.45, 0.02, 0.2, 1) forwards;
+}
+
+.voting-flip-in-left {
+  animation: voting-flip-in-left 0.58s cubic-bezier(0.45, 0.02, 0.2, 1) forwards;
+}
+

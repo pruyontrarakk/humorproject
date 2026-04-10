@@ -62,15 +62,15 @@ export default function GoogleSignInCard({
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
       <div className="card w-full max-w-md space-y-6 p-8">
         <div className="space-y-1 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight text-brand-800">
+          <h2 className="border-b-[3px] border-[#5b21b6] pb-1.5 text-2xl font-semibold tracking-tight text-brand-800">
             {heading}
           </h2>
           {subtitle ? (
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4c1d95]">
               {subtitle}
             </p>
           ) : null}
-          <p className="mt-2 text-sm text-slate-600">{description}</p>
+          <p className="mt-2 text-sm text-[rgba(93,48,23,0.72)]">{description}</p>
         </div>
 
         {showAuthError && (

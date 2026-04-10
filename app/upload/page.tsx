@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { votingTheme as vt } from "@/lib/votingTheme";
 
 const API_BASE = "https://api.almostcrackd.ai";
 
@@ -196,35 +197,39 @@ export default function UploadPage() {
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#ffffff",
+        backgroundColor: vt.mainBg,
       }}
     >
       <div
         style={{
           borderTopLeftRadius: 40,
           borderTopRightRadius: 40,
-          backgroundColor: "#f8f9fa",
-          padding: "40px 88px 72px 88px",
+          background: vt.panelBgGradient,
+          padding: "40px clamp(16px, 5vw, 88px) 72px",
           minHeight: "calc(100vh - 0px)",
-          boxShadow: "0 -4px 24px rgba(0, 0, 0, 0.06)",
+          boxShadow: vt.panelShadow,
+          borderTop: `1px solid ${vt.borderBrownLight}`,
         }}
       >
-        <h1
-          style={{
-            textAlign: "center",
-            fontSize: "2rem",
-            fontWeight: "bold",
-            marginBottom: "8px",
-            color: "#1a1a1a",
-          }}
-        >
-          Upload Image
-        </h1>
+        <div style={{ textAlign: "center", marginBottom: 8 }}>
+          <h1
+            style={{
+              display: "inline-block",
+              fontSize: "2rem",
+              fontWeight: "bold",
+              margin: 0,
+              color: vt.brown800,
+              borderBottom: `3px solid ${vt.purple}`,
+              paddingBottom: 6,
+            }}
+          >
+            Upload Image
+          </h1>
+        </div>
         <p
           style={{
             textAlign: "center",
-            color: "#1a1a1a",
-            opacity: 0.7,
+            color: vt.textMuted,
             marginBottom: 32,
             fontSize: 15,
           }}
@@ -250,7 +255,7 @@ export default function UploadPage() {
                 }
               }}
               style={{
-                border: "2px dashed rgba(0, 0, 0, 0.2)",
+                border: `2px dashed ${vt.purpleBorder}`,
                 borderRadius: 16,
                 padding: 48,
                 textAlign: "center",
@@ -269,7 +274,14 @@ export default function UploadPage() {
               <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.5 }}>
                 📷
               </div>
-              <p style={{ fontSize: 16, fontWeight: 500, color: "#1a1a1a", margin: 0 }}>
+              <p
+                style={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                  color: vt.brown800,
+                  margin: 0,
+                }}
+              >
                 Choose image or click to browse
               </p>
             </div>
@@ -281,8 +293,9 @@ export default function UploadPage() {
                 padding: 24,
                 backgroundColor: "#ffffff",
                 borderRadius: 12,
-                border: "1px solid rgba(0, 0, 0, 0.08)",
+                border: `1px solid ${vt.borderBrown}`,
                 textAlign: "center",
+                boxShadow: vt.cardShadow,
               }}
             >
               <img
@@ -297,7 +310,13 @@ export default function UploadPage() {
                   margin: "0 auto 12px auto",
                 }}
               />
-              <p style={{ margin: "0 0 12px 0", fontSize: 14, color: "#1a1a1a", opacity: 0.8 }}>
+              <p
+                style={{
+                  margin: "0 0 12px 0",
+                  fontSize: 14,
+                  color: vt.textMuted,
+                }}
+              >
                 {selectedFile.name}
               </p>
               <button
@@ -307,9 +326,9 @@ export default function UploadPage() {
                   padding: "8px 16px",
                   fontSize: 14,
                   fontWeight: 500,
-                  color: "#1a1a1a",
-                  backgroundColor: "rgba(0, 0, 0, 0.08)",
-                  border: "none",
+                  color: vt.brown800,
+                  backgroundColor: vt.navActiveBg,
+                  border: `1px solid ${vt.borderBrownLight}`,
                   borderRadius: 8,
                   cursor: "pointer",
                 }}
@@ -350,8 +369,10 @@ export default function UploadPage() {
                   padding: "12px 24px",
                   fontSize: 16,
                   fontWeight: 500,
-                  color: "#ffffff",
-                  backgroundColor: loading ? "rgba(0, 0, 0, 0.4)" : "#1a1a1a",
+                  color: vt.ctaFg,
+                  backgroundColor: loading
+                    ? "rgba(93, 48, 23, 0.35)"
+                    : vt.ctaBg,
                   border: "none",
                   borderRadius: 12,
                   cursor: loading ? "not-allowed" : "pointer",
