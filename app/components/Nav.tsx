@@ -71,149 +71,82 @@ export default function Nav() {
     user?.email?.split("@")[0] ||
     "Profile";
 
-  // Hide on marketing / auth pages and when not authenticated
-  if (loading || !user || pathname === "/" || pathname === "/login") {
+  if (loading || !user || pathname === "/login") {
     return null;
   }
 
   return (
-    <nav
-      className="flex items-center justify-between gap-2 bg-white px-5 py-3"
-      style={{
-        borderBottom:
-          pathname === "/home" ||
-          pathname === "/voting" ||
-          pathname.startsWith("/upload")
-            ? `2px solid ${vt.purple}`
-            : `1px solid ${vt.borderBrownLight}`,
-        boxShadow:
-          pathname === "/home" ||
-          pathname === "/voting" ||
-          pathname.startsWith("/upload")
-            ? `0 3px 12px ${vt.purpleMuted}`
-            : undefined,
-      }}
-    >
-      <div className="flex gap-1">
-        <Link href="/home" style={linkStyle("/home")}>
-          Home
-        </Link>
-        <Link href="/voting" style={linkStyle("/voting")}>
-          Voting
-        </Link>
-        <Link href="/upload" style={linkStyle("/upload")}>
-          Upload
-        </Link>
+    <header className="flex items-center justify-between border-b-4 border-black bg-white px-6 py-4">
+      <div className="flex w-1/4 justify-start">
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="flex h-10 w-10 items-center justify-center border-2 border-black bg-white transition hover:bg-black hover:text-white"
+          aria-label="Open menu"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={3} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
 
-      <div
-        style={{
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        {loading ? (
-          <span
-            style={{
-              fontSize: 14,
-              color: "rgba(0,0,0,0.5)",
-            }}
-          >
-            …
-          </span>
-        ) : user ? (
-          <>
-            <button
-              type="button"
-              onClick={() => setMenuOpen((o) => !o)}
-              aria-expanded={menuOpen}
-              aria-haspopup="true"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              border: "none",
-              padding: "6px 11px",
-              borderRadius: 12,
-              fontSize: 14,
-              fontWeight: 500,
-              color: vt.brown700,
-              cursor: "pointer",
-              backgroundColor: menuOpen ? vt.navActiveBg : "transparent",
-            }}
-            >
-              <span>{displayName}</span>
-              <span
-                style={{
-                  display: "inline-block",
-                  transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 0.15s ease",
-                }}
-              >
-                ▼
-              </span>
-            </button>
-            {menuOpen && (
-              <>
-                <div
-                  role="presentation"
-                  style={{
-                    position: "fixed",
-                    inset: 0,
-                    zIndex: 10,
-                  }}
-                  onClick={() => setMenuOpen(false)}
-                />
-                <div
-                  role="menu"
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    right: 0,
-                    marginTop: 4,
-                    minWidth: 150,
-                    padding: "6px 0",
-                    borderRadius: 12,
-                    backgroundColor: vt.cardWhite,
-                    boxShadow: vt.cardShadow,
-                    border: `1px solid ${vt.borderBrown}`,
-                    zIndex: 20,
-                  }}
-                >
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={handleSignOut}
-                    style={{
-                      display: "block",
-                      width: "100%",
-                    padding: "8px 14px",
-                    textAlign: "left",
-                    border: "none",
-                    backgroundColor: "transparent",
-                    fontSize: 14,
-                      fontWeight: 500,
-                      color: vt.brown800,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Sign out
-                  </button>
-                </div>
-              </>
-            )}
-          </>
-        ) : (
-          <button
-            type="button"
-            onClick={handleSignIn}
-            className="btn-primary rounded-xl px-3.5 py-1.5 text-sm"
-          >
-            Sign in
-          </button>
-        )}
+      <div className="flex flex-1 flex-col items-center text-center">
+        <Link href="/home" className="text-2xl font-black uppercase tracking-tighter text-black sm:text-3xl">
+          Humor Project
+        </Link>
+        <div className="mt-1 bg-black px-2 py-0.5 text-[0.55rem] font-bold tracking-[0.3em] text-white">
+          OPERATIONAL INTERFACE
+        </div>
       </div>
-    </nav>
+
+      <div className="flex w-1/4 justify-end">
+        <div className="flex items-center gap-3">
+          <span className="hidden text-[0.6rem] font-bold uppercase tracking-widest text-black sm:block">
+            {displayName}
+          </span>
+          <button
+            onClick={handleSignOut}
+            className="border-2 border-black bg-black px-3 py-1 text-[0.6rem] font-black uppercase tracking-[0.2em] text-white transition hover:bg-white hover:text-black"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+
+      {menuOpen && (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white p-6">
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="absolute right-6 top-6 flex h-10 w-20 items-center justify-center border-2 border-black text-xs font-black uppercase tracking-widest transition hover:bg-brand-primary hover:text-white"
+          >
+            CLOSE
+          </button>
+
+          <nav className="flex flex-col items-center gap-1">
+            {[
+              { id: "home", label: "Home", href: "/home" },
+              { id: "voting", label: "Voting", href: "/voting" },
+              { id: "upload", label: "Upload", href: "/upload" }
+            ].map(tab => {
+              const isActive = pathname === tab.href;
+              return (
+                <Link
+                  key={tab.id}
+                  href={tab.href}
+                  className={[
+                    "text-4xl font-black uppercase tracking-tighter transition-all sm:text-6xl",
+                    isActive
+                      ? "bg-brand-primary px-3 text-white"
+                      : "text-black hover:bg-black hover:text-white"
+                  ].join(" ")}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+    </header>
   );
 }

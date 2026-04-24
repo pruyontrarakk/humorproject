@@ -175,17 +175,7 @@ export default async function HomePage({
           boxShadow: "0 -4px 24px rgba(0, 0, 0, 0.06)",
         }}
       >
-        <h1
-          style={{
-            textAlign: "center",
-            fontSize: "2rem",
-            fontWeight: "bold",
-            marginBottom: "24px",
-            color: "#1a1a1a",
-          }}
-        >
-          The Humor Project
-        </h1>
+
 
         {/* Category tabs */}
         <div
@@ -236,71 +226,71 @@ export default async function HomePage({
           ))}
         </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 16,
-          marginTop: 20,
-        }}
-      >
-        {images.length === 0 ? (
-          <p
-            style={{
-              gridColumn: "1 / -1",
-              textAlign: "center",
-              color: "#1a1a1a",
-              opacity: 0.7,
-              marginTop: 24,
-            }}
-          >
-            {selectedCategoryId !== ALL_CATEGORIES_ID
-              ? "No images in this category."
-              : "No images found."}
-          </p>
-        ) : (
-          images
-            .filter((img: ImageRow) => {
-              const imageCaptions = captionsByImageId.get(img.id) ?? [];
-              const withContent = imageCaptions.find((c) => c.content?.trim());
-              return !!img?.url && !!withContent;
-            })
-            .map((img: ImageRow) => {
-              const imageCaptions = captionsByImageId.get(img.id) ?? [];
-              const firstCaption =
-                imageCaptions.find((c) => c.content?.trim()) ?? imageCaptions[0] ?? null;
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 16,
+            marginTop: 20,
+          }}
+        >
+          {images.length === 0 ? (
+            <p
+              style={{
+                gridColumn: "1 / -1",
+                textAlign: "center",
+                color: "#1a1a1a",
+                opacity: 0.7,
+                marginTop: 24,
+              }}
+            >
+              {selectedCategoryId !== ALL_CATEGORIES_ID
+                ? "No images in this category."
+                : "No images found."}
+            </p>
+          ) : (
+            images
+              .filter((img: ImageRow) => {
+                const imageCaptions = captionsByImageId.get(img.id) ?? [];
+                const withContent = imageCaptions.find((c) => c.content?.trim());
+                return !!img?.url && !!withContent;
+              })
+              .map((img: ImageRow) => {
+                const imageCaptions = captionsByImageId.get(img.id) ?? [];
+                const firstCaption =
+                  imageCaptions.find((c) => c.content?.trim()) ?? imageCaptions[0] ?? null;
 
-              return (
-                <figure key={img.id} style={{ margin: 0 }}>
-                  <img
-                    src={img.url}
-                    alt="Supabase image"
-                    style={{
-                      width: "100%",
-                      height: 320,
-                      objectFit: "cover",
-                      borderRadius: 14,
-                      display: "block",
-                    }}
-                  />
-                  {firstCaption?.content && firstCaption.content.trim().toLowerCase() !== "next" ? (
-                    <figcaption
+                return (
+                  <figure key={img.id} style={{ margin: 0 }}>
+                    <img
+                      src={img.url}
+                      alt="Supabase image"
                       style={{
-                        marginTop: 10,
-                        fontSize: 15,
-                        color: "#1a1a1a",
-                        opacity: 1,
-                        lineHeight: 1.4,
+                        width: "100%",
+                        height: 320,
+                        objectFit: "cover",
+                        borderRadius: 14,
+                        display: "block",
                       }}
-                    >
-                      {firstCaption.content}
-                    </figcaption>
-                  ) : null}
-                </figure>
-              );
-            })
-        )}
-      </div>
+                    />
+                    {firstCaption?.content && firstCaption.content.trim().toLowerCase() !== "next" ? (
+                      <figcaption
+                        style={{
+                          marginTop: 10,
+                          fontSize: 15,
+                          color: "#1a1a1a",
+                          opacity: 1,
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {firstCaption.content}
+                      </figcaption>
+                    ) : null}
+                  </figure>
+                );
+              })
+          )}
+        </div>
 
         {/* Simple pagination controls */}
         <div

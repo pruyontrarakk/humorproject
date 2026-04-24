@@ -60,37 +60,40 @@ export default function GoogleSignInCard({
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
-      <div className="card w-full max-w-md space-y-6 p-8">
-        <div className="space-y-1 text-center">
-          <h2 className="border-b-[3px] border-[#5b21b6] pb-1.5 text-2xl font-semibold tracking-tight text-brand-800">
-            {heading}
+      <div className="w-full max-w-md space-y-8 border-4 border-black bg-white p-10">
+        <div className="text-center space-y-4">
+          <h2 className="text-4xl font-black uppercase tracking-tighter text-black">
+            {heading.toUpperCase()}
           </h2>
-          {subtitle ? (
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4c1d95]">
-              {subtitle}
+          <div className="mx-auto h-1 w-12 bg-brand-primary" />
+          {subtitle && (
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-slate-400">
+              {subtitle.toUpperCase()}
             </p>
-          ) : null}
-          <p className="mt-2 text-sm text-[rgba(93,48,23,0.72)]">{description}</p>
+          )}
         </div>
 
-        {showAuthError && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            Sign-in failed. Please try again.
-          </p>
-        )}
-        {displayError && !showAuthError && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-            {displayError}
-          </p>
+        <div className="space-y-4 text-xs font-bold leading-relaxed text-black">
+          <p>{description}</p>
+          <div className="border-l-4 border-black bg-slate-50 p-3">
+            Use your authenticated Google account to gain system access.
+          </div>
+        </div>
+
+        {(showAuthError || displayError) && (
+          <div className="border-4 border-brand-primary bg-brand-primary p-3 text-white">
+            <p className="text-[0.6rem] font-black uppercase tracking-widest">ERROR: AUTH_FAILURE</p>
+            <p className="text-xs opacity-90 mt-1">{displayError || "Please try again or contact support."}</p>
+          </div>
         )}
 
         <button
           type="button"
           onClick={handleSignIn}
           disabled={loading}
-          className="btn-primary flex w-full items-center justify-center gap-2 text-sm"
+          className="btn-primary w-full py-4 text-sm font-black uppercase tracking-[0.2em]"
         >
-          {loading ? "Redirecting…" : "Sign in with Google"}
+          {loading ? "ESTABLISHING SESSION..." : "INITIATE GOOGLE AUTH"}
         </button>
       </div>
     </div>
